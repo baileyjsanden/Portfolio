@@ -1,0 +1,171 @@
+---
+title: "HI2020 Gold Group Project 1"
+author: "Mark Kelley, Tina Letter, Bailey Sanden, Alyssa Stegner, Stephanie Brandebura, Leslie Aparcana"
+date: "11/05/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r directory}
+#Setting the working directory to my school folder where the dataset is held. This should be changed by the user to reflect their current working directory.
+
+#setwd("/Users/markkelley/Desktop/HI2020_Practical_Statistics/")
+```
+
+```{r libraries}
+#Installing the necessary packages that will be used throughout the code
+
+#install.packages("ggplot2")
+library(ggplot2)
+#install.packages("tidyverse")
+library(tidyverse)
+#install.packages("dplyr")
+library(dplyr)
+#install.packages("readxl")
+library(readxl)
+#install.packages("usmap")
+library(usmap)
+```
+
+```{r dataset}
+#Uploading the entire dataset and then breaking it down into relevant variables
+
+all_data <- read_excel("BRFSS_BMI.xlsx")
+view(all_data)
+
+bmi_data <- select(all_data, Year, Locationabbr, Response, Break_Out, Sample_Size)
+
+bmi_data2 <- filter(bmi_data, Year == 2020 & Response== "Obese (BMI 30.0 - 99.8)" & Locationabbr != "UW" & Locationabbr != "US" & (Break_Out == "Male" | Break_Out == "Female" | Break_Out == "Overall"))
+
+bmi_data3 <- filter(bmi_data2,(Locationabbr=="ME" | Locationabbr=="NH" | Locationabbr=="VT" | Locationabbr=="MA" | Locationabbr=="RI" | Locationabbr=="CT" | Locationabbr=="NY" | Locationabbr=="NJ" | Locationabbr=="PA" | Locationabbr=="DE" | Locationabbr=="MD" | Locationabbr=="DC" | Locationabbr=="VA" | Locationabbr=="WV" | Locationabbr=="KY" | Locationabbr=="NC" | Locationabbr=="TN" | Locationabbr=="SC" | Locationabbr=="GA" | Locationabbr=="AL" | Locationabbr=="FL" | Locationabbr=="MS" | Locationabbr=="LA" | Locationabbr=="AR" | Locationabbr=="OK" | Locationabbr=="TX") )
+print(bmi_data3)
+
+#Creating a dataframe of obesity in the year 2020 for the north east and south east coast
+
+#bmi_data2 <- filter(bmi_data, Year == "2020" & Response== "Obese (BMI 30.0 - 99.8)" & (Locationabbr=="ME" | Locationabbr=="NH" | Locationabbr=="VT" | Locationabbr=="MA" | Locationabbr=="RI" | Locationabbr=="CT" | Locationabbr=="NY" | Locationabbr=="NJ" | Locationabbr=="PA" | Locationabbr=="DE" | Locationabbr=="MD" | Locationabbr=="DC" | Locationabbr=="VA" | Locationabbr=="WV" | Locationabbr=="KY" | Locationabbr=="NC" | Locationabbr=="TN" | Locationabbr=="SC" | Locationabbr=="GA" | Locationabbr=="AL" | Locationabbr=="FL" | Locationabbr=="MS" | Locationabbr=="LA" | Locationabbr=="AR" | Locationabbr=="OK" | Locationabbr=="TX") | Year != "2019" | Locationabbr != "UW" & Locationabbr != "US" & (Break_Out == "Male" | Break_Out == "Female" | Break_Out == "Overall"))
+
+print(bmi_data2)
+
+```
+
+```{r exploratory}
+#Changing the data frame to turn the Break_Out feature into separate features 
+obesity <- pivot_wider(bmi_data3, names_from = Break_Out, values_from = Sample_Size)
+
+#Added a Feature labeling the two regions "Northeast" and "south"
+obesityRegions <-obesity %>%
+mutate(Region = case_when (Locationabbr=="ME" | Locationabbr=="NH" | Locationabbr=="VT" | Locationabbr=="MA" | Locationabbr=="RI" | Locationabbr=="CT" | Locationabbr=="NY" | Locationabbr=="NJ" | Locationabbr=="PA" ~ 'northeast', Locationabbr=="DE" | Locationabbr=="MD" | Locationabbr=="DC" | Locationabbr=="VA" | Locationabbr=="WV" | Locationabbr=="KY" | Locationabbr=="NC" | Locationabbr=="TN" | Locationabbr=="SC" | Locationabbr=="GA" | Locationabbr=="AL" | Locationabbr=="FL" | Locationabbr=="MS" | Locationabbr=="LA" | Locationabbr=="AR" | Locationabbr=="OK" | Locationabbr=="TX" ~'south' ))
+print(obesity)
+  
+#ggplot(bmi_data3, aes(x = Response, y = Female)) + geom_boxplot()
+
+
+ggplot(obesity, aes(x = Response, y = Female)) + geom_boxplot()
+ggplot(obesity,aes(x=Locationabbr,y=Overall))+ geom_col()
+ggplot(obesityRegions,aes(x=Region,y=Overall))+ geom_col()
+
+
+#Here is where you would want to start doing some exploratory analyses of the data
+#I think I might split the gender and age into two separate columns to make it easier on us
+```
+
+
+```{r}
+#filtered gender by south region to run some descriptive statistics displayed in the summary
+obesityRegions_South <- filter(obesityRegions,Region=="south")
+obesityRegions_South <- select(obesityRegions_South, Male, Female, Overall)
+
+summary(obesityRegions_South)
+std_south_male <- sd(obesityRegions_South$Male)
+std_south_female <- sd(obesityRegions_South$Female)
+std_south_overall <- sd(obesityRegions_South$Overall)
+
+#The summary function did not include the standard deviation so Std. Dev. for Male, Female, & Overall in the south is included below
+
+#Std. Dev. Southern Males
+print(std_south_male)
+#Std. Dev. Southern Females
+print(std_south_female)
+#Std. Dev. Southern Overall
+print(std_south_overall)
+```
+
+```{r}
+#filtered gender by northeast region to run some descriptive statistics displayed in the summary
+obesityRegions_Northeast <- filter(obesityRegions,Region=="northeast")
+obesityRegions_Northeast <- select(obesityRegions_Northeast, Male, Female, Overall)
+
+summary(obesityRegions_Northeast)
+
+#The summary function did not include the standard deviation so Std. Dev. for Male, Female, & Overall in the north is included below
+#Std. Dev. Northeast Males
+std_northeast_male <- sd(obesityRegions_Northeast$Male)
+#Std. Dev. Northeast Females
+std_northeast_female <- sd(obesityRegions_Northeast$Female)
+#Std. Dev. Northeast Overall
+std_northeast_overall <- sd(obesityRegions_Northeast$Overall)
+
+```
+
+```{r}
+#boxplots on Male, Female, and overall obesity in northeast and south region combined
+boxplot_female <- ggplot(obesity, aes(x = Response, y = Female)) + geom_boxplot(color="red")
+print(boxplot_female)
+
+boxplot_male <- ggplot(obesity, aes(x = Response, y = Male)) + geom_boxplot(color="blue")
+print(boxplot_male)
+
+boxplot_overall <- ggplot(obesity, aes(x = Response, y = Overall)) + geom_boxplot(color="green")
+print(boxplot_overall)
+
+boxplot_region_all <- ggplot(obesity_region_data, aes(x = Region, y = Overall)) + geom_boxplot(color="green")
+print(boxplot_region_all)
+
+boxplot_region_Female <- ggplot(obesity_region_data, aes(x = Region, y = Female)) + geom_boxplot(color="red")
+print(boxplot_region_Female)
+
+boxplot_region_Male <- ggplot(obesity_region_data, aes(x = Region, y = Male)) + geom_boxplot(color="blue")
+print(boxplot_region_Male)
+```
+
+```{r}
+#running a oneway ANOVA on obesity regions north and south 
+
+oneway_regions <- aov(Overall~Region + Male + Female, data=obesityRegions)
+summary(oneway_regions)
+
+```
+
+```{r}
+male_obesity <- select(obesityRegions, Locationabbr, Male)
+male_obesity$state <- male_obesity$Locationabbr
+male_map <- plot_usmap(data=male_obesity, values = "Male",
+  regions = c("states"),
+  include = c("AL","CT","AR","DE","DC","FL","GA","ME","LA","KY","MD","MA","MS","NH","NJ","NY","NC","OK","SC","RI","PA","TX","TN","VA","VT","WV"),
+  )+scale_fill_continuous(low="white",high="blue")+labs(fill = "Male Obesity")
+
+print(male_map)
+```
+
+```{r}
+female_obesity <- select(obesityRegions, Locationabbr, Female)
+female_obesity$state <- female_obesity$Locationabbr
+female_map <- plot_usmap(data=female_obesity, values = "Female",
+  regions = c("states"),
+  include = c("AL","CT","AR","DE","DC","FL","GA","ME","LA","KY","MD","MA","MS","NH","NJ","NY","NC","OK","SC","RI","PA","TX","TN","VA","VT","WV")
+  )+scale_fill_continuous(low="white",high="red")+ labs(fill = "Female Obesity")
+print(female_map)
+```
+
+```{r}
+Overall_obesity <- select(obesityRegions, Locationabbr, Overall)
+Overall_obesity$state <- Overall_obesity$Locationabbr
+Overall_map <- plot_usmap(data=Overall_obesity, values = "Overall",
+  regions = c("states"),
+  include = c("AL","CT","AR","DE","DC","FL","GA","ME","LA","KY","MD","MA","MS","NH","NJ","NY","NC","OK","SC","RI","PA","TX","TN","VA","VT","WV")
+  )+scale_fill_continuous(low="white",high="green")+ labs(fill = "Overall Obesity")
+print(Overall_map)
+```

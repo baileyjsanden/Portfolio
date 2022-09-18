@@ -1,0 +1,77 @@
+---
+title: "HI2020 Gold Group Project 1"
+author: "Mark Kelley, Tina Letter, Bailey Sanden, Alyssa Stegner, Stephanie Brandebura, Leslie Aparcana"
+date: "11/05/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r directory}
+#Setting the working directory to my school folder where the dataset is held. This should be changed by the user to reflect their current working directory.
+
+#setwd("/Users/markkelley/Desktop/HI2020_Practical_Statistics/")
+```
+
+```{r libraries}
+#Installing the necessary packages that will be used throughout the code
+
+#install.packages("ggplot2")
+library(ggplot2)
+#install.packages("tidyverse")
+library(tidyverse)
+#install.packages("dplyr")
+library(dplyr)
+library(maps)
+#install.packages("readxl")
+library(readxl)
+```
+
+```{r dataset}
+#Uploading the entire dataset and then breaking it down into relevant variables
+
+#all_data <- read_excel("BRFSS_BMI.xlsx")
+#view(all_data)
+
+bmi_data <- select(all_data, Year, Locationabbr, Response, Break_Out, Sample_Size)
+
+bmi_data2 <- filter(bmi_data, Year == 2020 & Response== "Obese (BMI 30.0 - 99.8)" & Locationabbr != "UW" & Locationabbr != "US" & (Break_Out == "Male" | Break_Out == "Female" | Break_Out == "Overall"))
+
+bmi_data3 <- filter(bmi_data2,(Locationabbr=="ME" | Locationabbr=="NH" | Locationabbr=="VT" | Locationabbr=="MA" | Locationabbr=="RI" | Locationabbr=="CT" | Locationabbr=="NY" | Locationabbr=="NJ" | Locationabbr=="PA" | Locationabbr=="DE" | Locationabbr=="MD" | Locationabbr=="DC" | Locationabbr=="VA" | Locationabbr=="WV" | Locationabbr=="KY" | Locationabbr=="NC" | Locationabbr=="TN" | Locationabbr=="SC" | Locationabbr=="GA" | Locationabbr=="AL" | Locationabbr=="FL" | Locationabbr=="MS" | Locationabbr=="LA" | Locationabbr=="AR" | Locationabbr=="OK" | Locationabbr=="TX") )
+print(bmi_data3)
+
+#Creating a dataframe of obesity in the year 2020 for the north east and south east coast
+
+#bmi_data2 <- filter(bmi_data, Year == "2020" & Response== "Obese (BMI 30.0 - 99.8)" & (Locationabbr=="ME" | Locationabbr=="NH" | Locationabbr=="VT" | Locationabbr=="MA" | Locationabbr=="RI" | Locationabbr=="CT" | Locationabbr=="NY" | Locationabbr=="NJ" | Locationabbr=="PA" | Locationabbr=="DE" | Locationabbr=="MD" | Locationabbr=="DC" | Locationabbr=="VA" | Locationabbr=="WV" | Locationabbr=="KY" | Locationabbr=="NC" | Locationabbr=="TN" | Locationabbr=="SC" | Locationabbr=="GA" | Locationabbr=="AL" | Locationabbr=="FL" | Locationabbr=="MS" | Locationabbr=="LA" | Locationabbr=="AR" | Locationabbr=="OK" | Locationabbr=="TX") | Year != "2019" | Locationabbr != "UW" & Locationabbr != "US" & (Break_Out == "Male" | Break_Out == "Female" | Break_Out == "Overall"))
+
+print(bmi_data2)
+
+```
+
+```{r exploratory}
+
+obesity <- pivot_wider(bmi_data3, names_from = Break_Out, values_from = Sample_Size)
+obesity$region<- mutate(obesity$Locationabbr, ne_region= Locationabbr=="ME" | Locationabbr=="NH" | Locationabbr=="VT" | Locationabbr=="MA" | Locationabbr=="RI" | Locationabbr=="CT" | Locationabbr=="NY" | Locationabbr=="NJ" | Locationabbr=="PA")
+print(obesity)
+  
+#ggplot(bmi_data3, aes(x = Response, y = Female)) + geom_boxplot()
+
+#summary statistics of obese females and males in the east coast and west coast states
+summary(obesity$Female)
+summary(obesity$Male)
+
+ggplot(obesity, aes(x = Response, y = Female)) + geom_boxplot()
+ggplot(obesity,aes(x=Locationabbr,y=Overall))+ geom_col()
+
+
+#Here is where you would want to start doing some exploratory analyses of the data
+#I think I might split the gender and age into two separate columns to make it easier on us
+```
+
+
+```{r}
+
+```
+

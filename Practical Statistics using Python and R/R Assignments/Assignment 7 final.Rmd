@@ -1,0 +1,74 @@
+---
+title: "Assignment 7"
+Author: Bailey Sanden
+Date: 10/26/2021
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+  '': default
+html_document: null
+word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+#check nhanes data 
+```{r}
+#Question 1: Write an R code using NHANES data to produce this figure. 
+#install n=NHANES
+library(NHANES)
+library(ggplot2)
+library(tidyverse)
+#head(NHANES)
+#summary(NHANES)
+#View(NHANES)
+colnames(NHANES)
+NHANES2 <- NHANES %>% filter(!is.na(Diabetes))
+plot <- ggplot(data=NHANES2, aes(x=Gender,y=BMI, color=Diabetes)) + geom_boxplot() + facet_grid(rows=vars(PhysActive), cols=vars(SurveyYr))
+print(plot)
+```
+
+```{r}
+# Question 2: "Describe the data, aesthetic mappings, and layers used for each of the following plots. 
+
+"1. ggplot(mpg, aes(cty, hwy)) + geom point()
+The X axis will be city and the y axis will be highway. This data will be imported and visualized as points/dots on a graph
+2. ggplot(diamonds, aes(carat, price)) + geom point()
+The x axis will be carat and the price will be the y axis. This data again will be imported and visualzied as points/dots on a graph.
+3. ggplot(economics, aes(date, unemploy)) + geom line()
+The date will be the x axis and the y axis will be unemployed. The data will be imported and visualzied as a continuous line.
+4. ggplot(mpg, aes(cty)) + geom histogram()
+The city will be the x axis and the infomration from the data will be inserted as the y axis such as amount of cities. The data will be imported and represented as bars"
+
+```
+
+```{r}
+#Question 3: Using the example of R code that is posted as part of the classroom session, please work on BRFSS data.  You can download BRFSS (Behavioral Risk Factor Surveillance System)
+load("/Users/baileysanden/Downloads/archive/brfss2013.RData")
+sleptim1_state_data <- brfss2013 %>%
+  group_by(X_state) %>%
+  filter(!is.na(sleptim1)) %>%
+  summarise(mean_sleptim1 = mean(sleptim1))
+sleptim1_state_data %>%
+  top_n(5)
+choro_sleptim1 <- left_join(
+  map_data("state"), 
+  sleptim1_state_data %>% 
+    mutate(region=tolower(X_state))
+)
+ggplot(choro_sleptim1, aes(long, lat)) +
+  geom_polygon(aes(group = group, fill = mean_sleptim1)) +
+  coord_quickmap() + scale_fill_gradient(low="#F7C53D", high="#AE0B1C") +
+  theme(axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()) +
+  labs(fill = "Mean Sleep Time")
+```
